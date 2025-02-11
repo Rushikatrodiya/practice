@@ -1,46 +1,67 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
-import { friend, userDetailProp } from "../types/type";
-import { fetchUserFriends } from "../utils/fetchutil";
+import { useParams, useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
+import useUserFriend from "../hook/useUserFriend";
+import useUserDetail from "../hook/useUserDetail"; // Import the new hook
 import Table from "../ui/Table";
 
+const UserDetail = () => {
+  const { username } = useParams();
+  const navigate = useNavigate();
 
-const UserDetail: React.FC<userDetailProp> = ({ user, backbutton }) => {
-  const { data, error, isLoading } = useQuery<{ data: friend[] }, Error>({
-    queryKey: ["userFriends", user.username],
-    queryFn: () => fetchUserFriends(user.username),
-  });
+  const { user, status } = useUserDetail(username!);
+  const { dataList, status: friendsStatus } = useUserFriend(username!);
 
-  const friends: friend[] = data?.data || [];
+  if (status === "pending" || friendsStatus === "pending") {
+    return <span>Loading...</span>;
+  } else if (status === "error" || friendsStatus === "error") {
+    return <span style={{ color: "red" }}>Failed to load data</span>;
+  }
+
+  if (!user) return null;
 
   return (
     <>
       <div>
         <img src={user.images.jpg.image_url} alt={user.username} />
-        <p><strong>USERNAME:</strong> {user.username}</p>
-        <p><strong>GENDER:</strong> {user.gender || "N/A"}</p>
-        <p><strong>LAST ONLINE:</strong> {user.last_online}</p>
+        <p>
+          <span>USERNAME : </span>
+          {user.username}
+        </p>
+        <p>
+          <span>LAST ONLINE : </span>
+          {user.last_online}
+        </p>
       </div>
-      <Button onClick={backbutton}>Back To List</Button>
+      <Button onClick={() => navigate("/")} color="green">
+        Back To UserData
+      </Button>
 
-      {isLoading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>Failed to load data</p>}
-
-      <Table
-        data={friends}
-        columns={[
-          { header: "Username", render: (friend) => friend.user.username },
-          { header: "Last Online", render: (friend) => friend.last_online },
-          {
-            header: "Image",
-            render: (friend) => (
-              <img src={friend.user.images.jpg.image_url} alt={friend.user.username} width="50" />
-            ),
-          },
-          { header: "Friend Since", render: (friend) => friend.friends_since || "Unknown" },
-        ]}
-      />
+      {dataList.length === 0 ? (
+        <p>There's no friends in list</p>
+      ) : (
+        <Table
+          data={dataList}
+          type="friend"
+          columns={[
+            { header: "Username", render: (friend) => friend.user.username },
+            { header: "Last Online", render: (friend) => friend.last_online },
+            {
+              header: "Image",
+              render: (friend) => (
+                <img
+                  src={friend.user.images.jpg.image_url}
+                  alt={friend.user.username}
+                  width="50"
+                />
+              ),
+            },
+            {
+              header: "Friend Since",
+              render: (friend) => friend.friends_since || "Unknown",
+            },
+          ]}
+        />
+      )}
     </>
   );
 };

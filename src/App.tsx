@@ -1,22 +1,12 @@
-import React, { useState } from "react";
-import UserTable from "./components/UserTable";
-import UserDetail from "./components/UserDetail";
-import { User } from "./types/type";
+import Navbar from "./components/Navbar";
+import { Outlet } from "react-router-dom";
 
-
-
-const App:React.FC = () => {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
+const App = () => {
   return (
-    <div>
-      <h1>User Details</h1>
-      {!selectedUser ? (
-        <UserTable onselect={(user) => setSelectedUser(user)} />
-      ) : (
-        <UserDetail user={selectedUser} backbutton={() => setSelectedUser(null)} />
-      )}
-    </div>
+    <>
+      <Navbar />
+      <Outlet />
+    </>
   );
 };
 
