@@ -144,3 +144,33 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
+
+
+
+
+
+
+
+
+
+export async function signUpAction(formData: FormData) {
+  const data = {
+    name: formData.get("name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirmpassword: formData.get("confirmpassword"),
+  };
+
+  // Validate the data
+  const result = SignUpSchema.safeParse(data);
+
+  if (!result.success) {
+    // Return validation errors
+    return { errors: result.error.flatten().fieldErrors };
+  }
+
+  // Here, you would handle successful sign-up (e.g., save to DB)
+  console.log("Valid SignUp Data:", result.data);
+
+  return { success: true };
+}
