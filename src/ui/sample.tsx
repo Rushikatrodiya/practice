@@ -174,3 +174,86 @@ export async function signUpAction(formData: FormData) {
 
   return { success: true };
 }
+
+
+
+
+
+
+
+"use client";
+import { useState } from "react";
+import FormField from "../forms/FormField";
+import FormGroup from "../forms/FormGroup";
+import BaseButton from "../ui/BaseButton";
+import BaseInput from "../ui/BaseInput";
+import Link from "next/link";
+import { signUpAction } from "@/app/actions/signupAction";
+
+const SignUpForm = () => {
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErrors({});
+    setSuccess(null);
+
+    const formData = new FormData(event.currentTarget);
+    const response = await signUpAction(formData);
+
+    if (response?.errors) {
+      setErrors(response.errors);
+    } else {
+      setSuccess("Sign-up successful!");
+    }
+  };
+
+  return (
+    <form onSubmit={onSubmit}>
+      <FormGroup>
+        <h1 className="flex flex-col items-center justify-center mb-10 text-xl">
+          SignUp Form
+        </h1>
+
+        <FormField label="Name" name="name" error={errors.name?.[0]}>
+          <BaseInput type="text" name="name" placeholder="Enter your name..." />
+        </FormField>
+
+        <FormField label="Email" name="email" error={errors.email?.[0]}>
+          <BaseInput type="email" name="email" placeholder="Enter your email..." />
+        </FormField>
+
+        <FormField label="Password" name="password" error={errors.password?.[0]}>
+          <BaseInput type="password" name="password" placeholder="Enter your password..." />
+        </FormField>
+
+        <FormField
+          label="Confirm Password"
+          name="confirmpassword"
+          error={errors.confirmpassword?.[0]}
+        >
+          <BaseInput type="password" name="confirmpassword" placeholder="Confirm your password..." />
+        </FormField>
+
+        <BaseButton
+          type="submit"
+          intent="success"
+          classNames={{
+            root: "mb-2 w-full py-2 rounded-md",
+          }}
+        >
+          Submit
+        </BaseButton>
+
+        {success && <p className="text-green-600 text-center">{success}</p>}
+
+        <Link href="#" className="flex justify-end text-md text-blue-600 hover:underline mb-4">
+          Already have an account?
+        </Link>
+      </FormGroup>
+    </form>
+  );
+};
+
+export default SignUpForm;
